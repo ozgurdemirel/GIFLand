@@ -5,7 +5,7 @@
 
   [![GitHub Release](https://img.shields.io/github/v/release/ozgurdemirel/GIFLand)](https://github.com/ozgurdemirel/GIFLand/releases)
   [![License](https://img.shields.io/github/license/ozgurdemirel/GIFLand)](LICENSE)
-  [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/ozgurdemirel/GIFLand)
+  [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](https://github.com/ozgurdemirel/GIFLand)
 
   <br/>
 
@@ -15,7 +15,7 @@
 </div>
 
 <div align="center">
-  <h3>🎬 Powerful screen recording tool for GIF, WebP, and MP4</h3>
+  <h3>🎬 Powerful screen recording tool for GIF and WebP</h3>
   <p>Record your screen with high quality and small file sizes</p>
 </div>
 
@@ -24,7 +24,7 @@
 ## ✨ Features
 
 - 🎯 **Multiple Recording Modes** - Full screen, area selection, or window capture
-- 📹 **Multiple Formats** - Export as GIF, WebP (up to 80% smaller than GIF), or MP4
+- 📹 **Multiple Formats** - Export as GIF or WebP (up to 80% smaller than GIF)
 - 🚀 **GPU-Accelerated Capture** - ScreenCaptureKit on macOS for high-performance recording
 - 🎨 **Customizable Quality** - Adjust FPS, quality, and scale to your needs
 - ⏸️ **Pause & Resume** - Control your recording without losing frames
@@ -42,7 +42,6 @@ Choose the version for your operating system:
 | Platform | Download | Requirements |
 |----------|----------|--------------|
 | **Mac (Apple Silicon)** | [Download DMG](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | M1/M2/M3/M4 Macs, macOS 12.3+ |
-| **Mac (Intel)** | [Download DMG](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Intel-based Macs, macOS 12.3+ |
 
 ### 🪟 Windows
 
@@ -50,17 +49,11 @@ Choose the version for your operating system:
 |----------|----------|--------------|
 | **Windows** | [Download MSI](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Windows 10/11 (64-bit) |
 
-### 🐧 Linux
-
-| Platform | Download | Requirements |
-|----------|----------|--------------|
-| **Linux** | [Download DEB](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Ubuntu/Debian 64-bit |
-
 ## 🚀 Quick Start Guide
 
 ### macOS Installation
 
-1. **Download** the DMG file for your Mac type (Apple Silicon or Intel)
+1. **Download** the DMG file for Apple Silicon Macs
 2. **Open** the downloaded DMG file
 3. **Drag** GIF Land to your Applications folder
 4. **Launch** GIF Land from Applications
@@ -77,13 +70,6 @@ Choose the version for your operating system:
 3. **Launch** GIF Land from Start Menu or Desktop shortcut
 4. **Allow** any Windows security prompts for screen capture
 
-### Linux Installation
-
-1. **Download** the DEB package
-2. **Install** with: `sudo dpkg -i GIF-Land_*.deb`
-3. **Launch** GIF Land from your application menu
-4. **Grant** necessary permissions for screen capture
-
 ## 📖 How to Use
 
 ### 1️⃣ Select Recording Mode
@@ -99,7 +85,7 @@ Customize your recording:
 
 | Setting | Description | Recommended |
 |---------|-------------|-------------|
-| **Format** | Output file format | WebP for web, MP4 for video, GIF for compatibility |
+| **Format** | Output file format | WebP for small size, GIF for compatibility |
 | **FPS** | Frames per second (1-60) | 15-30 for most uses |
 | **Quality** | Encoding quality (1-100) | 80-90 for balanced quality/size |
 | **Scale** | Resize factor (0.1-1.0) | 1.0 for full quality |
@@ -125,7 +111,7 @@ Customize your recording:
 - Use **0.5-0.75** scale for large recordings
 
 ### For High Quality
-- Use **MP4** format with quality **80-100**
+- Use **WebP** format with quality **80-100**
 - Set FPS to **30** or higher
 - Keep scale at **1.0**
 
@@ -145,9 +131,8 @@ Customize your recording:
 - System Preferences → Security & Privacy → Privacy → Screen Recording
 - Enable GIF Land
 
-**App crashes on launch (Apple Silicon)**
-- Make sure you downloaded the ARM64 version
-- Try Intel version with Rosetta 2 if issues persist
+**App crashes on launch**
+- Make sure you downloaded the correct version for your Mac (Apple Silicon)
 
 ### Windows Issues
 

@@ -1,7 +1,7 @@
 # CLAUDE.md - AI Assistant Guide for GIF-Land
 
 > **Comprehensive guide for AI assistants (specifically Claude) when working with the GIF-Land codebase.**
-> **GIF-Land**: High-performance screen recording to GIF/WebP/MP4 for macOS and Windows
+> **GIF-Land**: High-performance screen recording to GIF/WebP for macOS and Windows
 
 ---
 
@@ -47,7 +47,7 @@ The capture system uses a **priority-based fallback chain**:
 
 ```
 macOS:  ScreenCaptureKit → Robot API → FFmpeg
-Windows/Linux:  Robot API → FFmpeg
+Windows:  Robot API → FFmpeg
 ```
 
 **Rules:**
@@ -70,7 +70,7 @@ Before modifying platform code, verify:
 ```bash
 # After modifying composeApp/native/Swift/SCKBridge.swift
 ./gradlew buildSckBridgeMac
-# Binaries go to: src/jvmMain/resources/natives/darwin/{arm64,x64}/
+# Binaries go to: src/jvmMain/resources/natives/darwin/arm64/
 ```
 
 ### 5. Coroutine Discipline - USE ApplicationScope
@@ -121,26 +121,24 @@ CoroutineScope(Dispatchers.IO).launch { /* ... */ }  // Avoid for long-lived ops
 ### 1.1 Project Name and Purpose
 
 **Name**: GIF Land
-**Purpose**: Desktop screen recording application that captures screen content directly to GIF, WebP, or MP4 formats with high performance and quality.
+**Purpose**: Desktop screen recording application that captures screen content directly to GIF or WebP formats with high performance and quality.
 
 ### 1.2 Key Features
 
-- **Multi-Format Output**: GIF, WebP (80% smaller than GIF), MP4
+- **Multi-Format Output**: GIF, WebP (80% smaller than GIF)
 - **GPU-Accelerated Capture**: ScreenCaptureKit on macOS 12.3+
 - **Flexible Recording**: Full screen, area selection, configurable FPS/quality
 - **Countdown Timer**: Configurable pre-recording delay with visual overlay
 - **System Tray Integration**: Minimize to tray, quick controls, recording indicator
 - **Global Hotkeys**: Start/stop/pause recording from anywhere
-- **Cross-Platform**: macOS (ARM64 + Intel) and Windows
+- **Cross-Platform**: macOS (Apple Silicon) and Windows
 
 ### 1.3 Supported Platforms
 
 | Platform | Architecture | Capture Method | Package |
 |----------|-------------|----------------|---------|
 | macOS | Apple Silicon (ARM64) | ScreenCaptureKit | DMG |
-| macOS | Intel (x64) | ScreenCaptureKit | DMG |
 | Windows | 64-bit | Robot API / GDIgrab | MSI |
-| Linux | 64-bit | Robot API / X11grab | Deb |
 
 ---
 
@@ -158,7 +156,6 @@ CoroutineScope(Dispatchers.IO).launch { /* ... */ }  // Avoid for long-lived ops
 # Packaging
 ./gradlew packageDmg                         # macOS DMG (run on macOS)
 ./gradlew packageMsi                         # Windows MSI (run on Windows)
-./gradlew packageDeb                         # Linux Deb
 
 # Native Code (macOS only)
 ./gradlew buildSckBridgeMac                  # Rebuild Swift bridge
@@ -304,7 +301,7 @@ GIF-Land/
 │   │   │
 │   │   └── jvmMain/resources/
 │   │       ├── icons/                 # App icons (ICO, ICNS, PNG)
-│   │       └── natives/darwin/        # Swift dylibs (arm64, x64)
+│   │       └── natives/darwin/        # Swift dylibs (arm64)
 │   │
 │   ├── native/Swift/
 │   │   └── SCKBridge.swift            # ScreenCaptureKit bridge
@@ -460,7 +457,6 @@ interface ScreenCaptureStrategy {
    │
 7. Encode frames to target format
    │    ├── WebP: NativeEncoderSimple.encodeWebPFromFiles()
-   │    ├── MP4:  NativeEncoderSimple.encodeMP4FromFiles()
    │    └── GIF:  NativeEncoderSimple.encodeGIFFromFiles()
    │
 8. Cleanup temp files
@@ -473,7 +469,6 @@ interface ScreenCaptureStrategy {
 | Format | Codec | Quality Range | Use Case |
 |--------|-------|---------------|----------|
 | WebP | VP8/VP9 | 30-90 | Web, small size |
-| MP4 | H.264 | CRF 0-35 | Video playback |
 | GIF | Palette-based | FPS cap 12-20 | Universal compatibility |
 
 ---
@@ -503,7 +498,6 @@ interface SCKBridgeLibrary : Library {
 ./gradlew buildSckBridgeMac
 # Outputs:
 # - src/jvmMain/resources/natives/darwin/arm64/libsck_bridge_swift.dylib
-# - src/jvmMain/resources/natives/darwin/x64/libsck_bridge_swift.dylib
 ```
 
 ### 8.2 FFmpeg via JAVE2
@@ -513,9 +507,7 @@ JAVE2 provides signed FFmpeg binaries from Maven Central:
 ```kotlin
 // Platform-specific dependencies (auto-selected in build.gradle.kts)
 "ws.schild:jave-nativebin-osxm1:3.5.0"    // Apple Silicon
-"ws.schild:jave-nativebin-osx64:3.5.0"    // Intel Mac
 "ws.schild:jave-nativebin-win64:3.5.0"    // Windows
-"ws.schild:jave-nativebin-linux64:3.5.0"  // Linux
 ```
 
 ### 8.3 macOS Entitlements
@@ -610,18 +602,18 @@ fun main() = application {
 
 1. Add to `OutputFormat` enum in `AppState.kt`:
    ```kotlin
-   enum class OutputFormat { GIF, WEBP, MP4, AVIF }
+   enum class OutputFormat { GIF, WEBP, NEW_FORMAT }
    ```
 
 2. Add encoder method in `NativeEncoderSimple.kt`:
    ```kotlin
-   fun encodeAVIFFromFiles(frameFiles, outputFile, quality, fps, onProgress): Result<File>
+   fun encodeNewFormatFromFiles(frameFiles, outputFile, quality, fps, onProgress): Result<File>
    ```
 
 3. Add case in `Recorder.stopRecordingInternal()`:
    ```kotlin
-   OutputFormat.AVIF -> {
-       NativeEncoderSimple.encodeAVIFFromFiles(...)
+   OutputFormat.NEW_FORMAT -> {
+       NativeEncoderSimple.encodeNewFormatFromFiles(...)
    }
    ```
 
