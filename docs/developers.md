@@ -5,7 +5,7 @@ A high-performance screen recording application for macOS and Windows built with
 
 ## ✨ Features
 
-- **Multiple Recording Modes**: Full screen, area selection, window capture
+- **Multiple Recording Modes**: Full screen, area selection
 - **Multiple Output Formats**: WebP (animated), GIF
 - **GPU-Accelerated Capture**: ScreenCaptureKit on macOS 12.3+
 - **High Performance**: Optimized frame capture and encoding via JAVE2
@@ -28,7 +28,7 @@ A high-performance screen recording application for macOS and Windows built with
 
 ## 📋 Requirements
 
-- **macOS**: 12.3 (Monterey) or higher for ScreenCaptureKit (Apple Silicon recommended)
+- **macOS**: 12.3 (Monterey) or higher, Apple Silicon required
 - **Windows**: 10/11 (64-bit)
 - **JDK**: 17 or higher
 - **Memory**: 8GB RAM recommended
@@ -66,7 +66,7 @@ GIF-Land/
 │   │   │
 │   │   └── jvmMain/resources/
 │   │       ├── icons/          # App icons (ICO, ICNS, PNG)
-│   │       └── natives/darwin/ # Swift dylibs (arm64, x64)
+│   │       └── natives/darwin/ # Swift dylibs (arm64)
 │   │
 │   ├── native/Swift/           # ScreenCaptureKit bridge source
 │   │   └── SCKBridge.swift

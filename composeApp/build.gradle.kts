@@ -62,22 +62,26 @@ kotlin {
             // JAVE2 - FFmpeg Java wrapper (includes signed binaries for macOS)
             implementation("ws.schild:jave-core:3.5.0")
 
-            // Platform-specific FFmpeg binaries
+            // Platform-specific FFmpeg binaries (selected at build time based on host OS)
+            // Active: macOS Apple Silicon, Windows 64-bit
+            // Future: macOS Intel, Linux 64-bit
             val osName = System.getProperty("os.name").lowercase()
             val osArch = System.getProperty("os.arch").lowercase()
             when {
                 osName.contains("mac") && (osArch == "aarch64" || osArch.contains("arm")) -> {
-                    // Apple Silicon (M1/M2/M3)
+                    // macOS Apple Silicon (M1/M2/M3/M4) - ACTIVE
                     implementation("ws.schild:jave-nativebin-osxm1:3.5.0")
                 }
                 osName.contains("mac") -> {
-                    // Intel Mac
+                    // macOS Intel - FUTURE (kept for future Intel Mac builds)
                     implementation("ws.schild:jave-nativebin-osx64:3.5.0")
                 }
                 osName.contains("win") -> {
+                    // Windows 64-bit - ACTIVE
                     implementation("ws.schild:jave-nativebin-win64:3.5.0")
                 }
                 else -> {
+                    // Linux 64-bit - FUTURE (kept for future Linux builds)
                     implementation("ws.schild:jave-nativebin-linux64:3.5.0")
                 }
             }
