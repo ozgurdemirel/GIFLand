@@ -38,7 +38,10 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.transitions.FadeTransition
 import club.ozgur.gifland.LocalRecorder
+import club.ozgur.gifland.LocalRecordingService
 import club.ozgur.gifland.LocalWindowControl
+import club.ozgur.gifland.domain.model.CaptureRegion
+import club.ozgur.gifland.core.ApplicationScope
 import club.ozgur.gifland.util.Log
 import club.ozgur.gifland.core.OutputFormat
 import club.ozgur.gifland.ui.components.AreaSelector
@@ -65,6 +68,7 @@ object MainScreenCompact : Screen {
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
         val recorder = LocalRecorder.current
+        val recordingService = LocalRecordingService.current
         val stateRepository = koinInject<StateRepository>()
         val appState by stateRepository.state.collectAsState()
 
@@ -331,15 +335,13 @@ object MainScreenCompact : Screen {
                                     recorder.reset()
                                     // Navigate immediately to RecordingScreen to avoid showing both
                                     navigator.push(RecordingScreen)
-                                    recorder.startRecording(
-                                        area = selectedArea,
-                                        onUpdate = { /* Handled by StateFlow */ },
-                                        onComplete = { result ->
-                                            result.onFailure { error ->
-                                                Log.e("MainScreen", "Recording failed", error)
-                                            }
-                                        }
-                                    )
+                                    // Use RecordingService to update StateRepository (enables system tray blink)
+                                    val captureRegion = selectedArea?.let {
+                                        CaptureRegion(it.x, it.y, it.width, it.height)
+                                    }
+                                    ApplicationScope.launch {
+                                        recordingService.startRecording(captureRegion)
+                                    }
                                 },
                                 modifier = Modifier
                                     .size(80.dp)
