@@ -1,19 +1,18 @@
 # Developer Documentation
-# GIF/WebP/MP4 Screen Recorder
+# GIF/WebP Screen Recorder
 
-A high-performance screen recording application for macOS, Windows, and Linux built with Kotlin Multiplatform and Compose Desktop. Records screen content directly to WebP, MP4, or GIF formats using JAVE2 (FFmpeg wrapper).
+A high-performance screen recording application for macOS and Windows built with Kotlin Multiplatform and Compose Desktop. Records screen content directly to WebP or GIF formats using JAVE2 (FFmpeg wrapper).
 
 ## ✨ Features
 
 - **Multiple Recording Modes**: Full screen, area selection, window capture
-- **Multiple Output Formats**: WebP (animated), MP4, GIF
+- **Multiple Output Formats**: WebP (animated), GIF
 - **GPU-Accelerated Capture**: ScreenCaptureKit on macOS 12.3+
 - **High Performance**: Optimized frame capture and encoding via JAVE2
-- **Cross-Platform**: macOS (Apple Silicon & Intel), Windows, Linux
+- **Cross-Platform**: macOS (Apple Silicon) & Windows
 - **Customizable Settings**: FPS (1-60), quality, scale factor
 - **Countdown Timer**: Configurable pre-recording delay
 - **System Tray**: Minimize to tray with quick controls
-- **Global Hotkeys**: Start/stop/pause from anywhere
 - **Pause/Resume**: Control recording without losing frames
 - **Smart Fallback**: ScreenCaptureKit → Robot API → FFmpeg
 
@@ -29,9 +28,8 @@ A high-performance screen recording application for macOS, Windows, and Linux bu
 
 ## 📋 Requirements
 
-- **macOS**: 12.3 (Monterey) or higher for ScreenCaptureKit
+- **macOS**: 12.3 (Monterey) or higher for ScreenCaptureKit (Apple Silicon recommended)
 - **Windows**: 10/11 (64-bit)
-- **Linux**: Ubuntu/Debian 64-bit
 - **JDK**: 17 or higher
 - **Memory**: 8GB RAM recommended
 - **Disk Space**: 5GB for build
@@ -63,7 +61,7 @@ GIF-Land/
 │   │   │   │   ├── strategy/   # ScreenCaptureKit, Robot, FFmpeg
 │   │   │   │   └── sck/        # Swift bridge interface
 │   │   │   ├── encoder/        # JAVE2 wrapper, NativeEncoderSimple
-│   │   │   ├── platform/       # SystemTray, GlobalHotkeys
+│   │   │   ├── platform/       # SystemTray
 │   │   │   └── ui/             # Screens, components, theme
 │   │   │
 │   │   └── jvmMain/resources/
@@ -108,9 +106,6 @@ cd gif-land
 # Windows MSI
 ./gradlew packageMsi
 
-# Linux DEB
-./gradlew packageDeb
-
 # Build Swift bridge (macOS only, if modifying native code)
 ./gradlew buildSckBridgeMac
 ```
@@ -123,7 +118,6 @@ cd gif-land
 | `./gradlew :composeApp:build` | Compile and check |
 | `./gradlew packageDmg` | Create macOS DMG (run on macOS) |
 | `./gradlew packageMsi` | Create Windows MSI (run on Windows) |
-| `./gradlew packageDeb` | Create Linux DEB package |
 | `./gradlew buildSckBridgeMac` | Rebuild Swift ScreenCaptureKit bridge |
 | `./gradlew clean` | Clean all build artifacts |
 
@@ -135,7 +129,7 @@ cd gif-land
    - Area Selection: Draw rectangle to record
    - Window Capture: Select specific window
 3. **Configure settings**:
-   - Format: WebP, MP4, or GIF
+   - Format: WebP or GIF
    - FPS: 1-60 frames per second
    - Quality: 1-100 (higher is better)
    - Scale: 0.1-1.0 (resize output)
@@ -151,7 +145,6 @@ The application saves recordings to `~/Documents/` by default.
 - **FPS**: Higher FPS = smoother video, larger file size
 - **Quality**:
   - WebP: 80-100 recommended for best quality
-  - MP4: 50-80 balanced quality/size
   - GIF: 30-50 for reasonable file sizes
 - **Scale**: Reduce to create smaller files
 - **Max Duration**: Automatic stop after specified seconds
@@ -211,7 +204,6 @@ This project is for demonstration purposes. Commercial use requires proper licen
 For issues and questions:
 - Open an issue on GitHub
 - Check existing issues for solutions
-- Read the [installation guide](installation-tr.md) (Turkish)
 
 ---
 
