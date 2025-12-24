@@ -3,9 +3,9 @@
 <div align="center">
   <img src="docs/app-icon.svg" alt="GIF Land Logo" width="200"/>
 
-  [![GitHub Release](https://img.shields.io/github/v/release/ozgurclub/GIF-Land)](https://github.com/ozgurclub/GIF-Land/releases)
-  [![License](https://img.shields.io/github/license/ozgurclub/GIF-Land)](LICENSE)
-  [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/ozgurclub/GIF-Land)
+  [![GitHub Release](https://img.shields.io/github/v/release/ozgurdemirel/GIFLand)](https://github.com/ozgurdemirel/GIFLand/releases)
+  [![License](https://img.shields.io/github/license/ozgurdemirel/GIFLand)](LICENSE)
+  [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows%20%7C%20Linux-lightgrey)](https://github.com/ozgurdemirel/GIFLand)
 
   <br/>
 
@@ -41,20 +41,20 @@ Choose the version for your operating system:
 
 | Platform | Download | Requirements |
 |----------|----------|--------------|
-| **Mac (Apple Silicon)** | [Download DMG](https://github.com/ozgurclub/GIF-Land/releases/latest/) | M1/M2/M3/M4 Macs, macOS 12.3+ |
-| **Mac (Intel)** | [Download DMG](https://github.com/ozgurclub/GIF-Land/releases/latest/) | Intel-based Macs, macOS 12.3+ |
+| **Mac (Apple Silicon)** | [Download DMG](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | M1/M2/M3/M4 Macs, macOS 12.3+ |
+| **Mac (Intel)** | [Download DMG](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Intel-based Macs, macOS 12.3+ |
 
 ### 🪟 Windows
 
 | Platform | Download | Requirements |
 |----------|----------|--------------|
-| **Windows** | [Download MSI](https://github.com/ozgurclub/GIF-Land/releases/latest/) | Windows 10/11 (64-bit) |
+| **Windows** | [Download MSI](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Windows 10/11 (64-bit) |
 
 ### 🐧 Linux
 
 | Platform | Download | Requirements |
 |----------|----------|--------------|
-| **Linux** | [Download DEB](https://github.com/ozgurclub/GIF-Land/releases/latest/) | Ubuntu/Debian 64-bit |
+| **Linux** | [Download DEB](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Ubuntu/Debian 64-bit |
 
 ## 🚀 Quick Start Guide
 
@@ -171,8 +171,8 @@ Want to contribute or build from source? Check out our [Developer Documentation]
 
 Need help? Have questions?
 
-- 📝 [Report Issues](https://github.com/ozgurclub/GIF-Land/issues)
-- 💬 [Discussions](https://github.com/ozgurclub/GIF-Land/discussions)
+- 📝 [Report Issues](https://github.com/ozgurdemirel/GIFLand/issues)
+- 💬 [Discussions](https://github.com/ozgurdemirel/GIFLand/discussions)
 - 📧 Email: support@gifland.app
 
 ## 📄 License
@@ -182,7 +182,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## 🌟 Show Your Support
 
 If you find GIF Land useful, please consider:
-- ⭐ Starring the project on [GitHub](https://github.com/ozgurclub/GIF-Land)
+- ⭐ Starring the project on [GitHub](https://github.com/ozgurdemirel/GIFLand)
 - 🐛 Reporting bugs and suggesting features
 - 🤝 Contributing to the codebase
 - ☕ [Buy me a coffee](https://buymeacoffee.com/ozgurdemirel) to support development
