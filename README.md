@@ -1,4 +1,4 @@
-# GIF Land - Screen (to GIF / WebP) Recorder
+# GIF Land - Screen to GIF/WebP Recorder
 
 <div align="center">
   <img src="docs/app-icon.svg" alt="GIF Land Logo" width="200"/>
@@ -15,41 +15,41 @@
 </div>
 
 <div align="center">
-  <h3>🎬 Powerful screen recording tool for GIF and WebP</h3>
+  <h3>Powerful screen recording tool for GIF and WebP</h3>
   <p>Record your screen with high quality and small file sizes</p>
 </div>
 
 ---
 
-## ✨ Features
+## Features
 
-- 🎯 **Multiple Recording Modes** - Full screen, area selection, or window capture
-- 📹 **Multiple Formats** - Export as GIF or WebP (up to 80% smaller than GIF)
-- 🚀 **GPU-Accelerated Capture** - ScreenCaptureKit on macOS for high-performance recording
-- 🎨 **Customizable Quality** - Adjust FPS, quality, and scale to your needs
-- ⏸️ **Pause & Resume** - Control your recording without losing frames
-- ⏱️ **Countdown Timer** - Configurable pre-recording delay with visual overlay
-- 🔔 **System Tray Integration** - Minimize to tray, quick controls, and recording indicator
-- 💾 **Small File Sizes** - WebP format provides excellent quality with minimal size
-- 🔄 **Smart Fallback** - Automatic capture method selection for best compatibility
+- **Multiple Recording Modes** - Full screen or area selection
+- **Multiple Formats** - Export as GIF or WebP (up to 80% smaller than GIF)
+- **GPU-Accelerated Capture** - ScreenCaptureKit on macOS for high-performance recording
+- **Customizable Quality** - Adjust FPS, quality, and scale to your needs
+- **Pause & Resume** - Control your recording without losing frames
+- **Countdown Timer** - Configurable pre-recording delay with visual overlay
+- **System Tray Integration** - Minimize to tray, quick controls, and recording indicator
+- **Small File Sizes** - WebP format provides excellent quality with minimal size
+- **Smart Fallback** - Automatic capture method selection for best compatibility
 
-## 📥 Download
+## Download
 
 Choose the version for your operating system:
 
-### 🍎 macOS
+### macOS
 
 | Platform | Download | Requirements |
 |----------|----------|--------------|
 | **Mac (Apple Silicon)** | [Download DMG](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | M1/M2/M3/M4 Macs, macOS 12.3+ |
 
-### 🪟 Windows
+### Windows
 
 | Platform | Download | Requirements |
 |----------|----------|--------------|
 | **Windows** | [Download MSI](https://github.com/ozgurdemirel/GIFLand/releases/latest/) | Windows 10/11 (64-bit) |
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### macOS Installation
 
@@ -70,16 +70,16 @@ Choose the version for your operating system:
 3. **Launch** GIF Land from Start Menu or Desktop shortcut
 4. **Allow** any Windows security prompts for screen capture
 
-## 📖 How to Use
+## How to Use
 
-### 1️⃣ Select Recording Mode
+### 1. Select Recording Mode
 
 Choose how you want to capture your screen:
 
-- **🖥️ Full Screen** - Records your entire display
-- **📐 Area Selection** - Draw a rectangle to define recording area
+- **Full Screen** - Records your entire display
+- **Area Selection** - Draw a rectangle to define recording area
 
-### 2️⃣ Configure Settings
+### 2. Configure Settings
 
 Customize your recording:
 
@@ -90,20 +90,20 @@ Customize your recording:
 | **Quality** | Encoding quality (1-100) | 80-90 for balanced quality/size |
 | **Scale** | Resize factor (0.1-1.0) | 1.0 for full quality |
 
-### 3️⃣ Start Recording
+### 3. Start Recording
 
 1. Click the **red record button** to begin
 2. Perform your screen actions
 3. Use **pause/resume** if needed
 4. Click **stop** when finished
 
-### 4️⃣ Save Your Recording
+### 4. Save Your Recording
 
 - Recordings are automatically saved to your **Documents** folder
 - Files are named with timestamp: `recording_2025-10-05_14-30-45.webp`
 - You can change the save location in settings
 
-## 💡 Tips & Best Practices
+## Tips & Best Practices
 
 ### For Small File Sizes
 - Use **WebP** format (up to 80% smaller than GIF)
@@ -120,7 +120,7 @@ Customize your recording:
 - **GIF** for maximum compatibility
 - Consider reducing scale for faster loading
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### macOS Issues
 
@@ -148,29 +148,29 @@ Customize your recording:
 - Reduce recording area size
 - Use WebP format instead of GIF
 
-## 🛠️ For Developers
+## For Developers
 
 Want to contribute or build from source? Check out our [Developer Documentation](docs/developers.md).
 
-## 🆘 Support
+## Support
 
 Need help? Have questions?
 
-- 📝 [Report Issues](https://github.com/ozgurdemirel/GIFLand/issues)
-- 💬 [Discussions](https://github.com/ozgurdemirel/GIFLand/discussions)
-- 📧 Email: gifland@ayran.me
+- [Report Issues](https://github.com/ozgurdemirel/GIFLand/issues)
+- [Discussions](https://github.com/ozgurdemirel/GIFLand/discussions)
+- Email: gifland@ayran.me
 
-## 📄 License
+## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## 🌟 Show Your Support
+## Show Your Support
 
 If you find GIF Land useful, please consider:
-- ⭐ Starring the project on [GitHub](https://github.com/ozgurdemirel/GIFLand)
-- 🐛 Reporting bugs and suggesting features
-- 🤝 Contributing to the codebase
-- ☕ [Buy me a coffee](https://buymeacoffee.com/ozgurdemirel) to support development
+- Starring the project on [GitHub](https://github.com/ozgurdemirel/GIFLand)
+- Reporting bugs and suggesting features
+- Contributing to the codebase
+- [Buy me a coffee](https://buymeacoffee.com/ozgurdemirel) to support development
 
 ## AI Usage Transparency
 
