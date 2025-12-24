@@ -158,7 +158,7 @@ Need help? Have questions?
 
 - 📝 [Report Issues](https://github.com/ozgurdemirel/GIFLand/issues)
 - 💬 [Discussions](https://github.com/ozgurdemirel/GIFLand/discussions)
-- 📧 Email: support@gifland.app
+- 📧 Email: gifland@ayran.me
 
 ## 📄 License
 
