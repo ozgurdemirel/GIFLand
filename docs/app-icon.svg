@@ -1,0 +1,24 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8E2DE2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4A00E0;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Squircle -->
+  <rect x="50" y="50" width="924" height="924" rx="200" fill="url(#grad1)" filter="url(#shadow)"/>
+  
+  <!-- Inner "G" / Camera Lens stylized -->
+  <g transform="translate(512, 512)">
+    <!-- Outer Ring -->
+    <circle cx="0" cy="0" r="300" stroke="white" stroke-width="80" fill="none" opacity="0.9"/>
+    <!-- Inner Dot (Recording) -->
+    <circle cx="0" cy="0" r="140" fill="#FF4B4B"/>
+    <!-- Lens Reflection -->
+    <path d="M -200 -200 Q -100 -300 0 -250" stroke="white" stroke-width="40" stroke-linecap="round" opacity="0.4"/>
+  </g>
+</svg>

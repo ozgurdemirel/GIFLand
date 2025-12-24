@@ -1,0 +1,56 @@
+########################################
+# Root: OS/IDE/General
+########################################
+.DS_Store
+.idea/
+*.iml
+.kotlin/
+.gradle/
+local.properties
+captures/
+**/.vscode/
+
+########################################
+# Build outputs
+########################################
+**/build/
+!src/**/build/
+!scripts/build/
+.externalNativeBuild/
+.cxx/
+
+########################################
+# Xcode/macOS packaging
+########################################
+xcuserdata/
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+*.app
+*.pkg
+*.dmg
+
+# Rust/Cargo - Removed (using pure JVM now)
+
+########################################
+# FFmpeg and external sources
+########################################
+others/ffmpeg-source/
+ffmpeg-build/
+
+########################################
+# Temp/Logs
+########################################
+*.tmp
+*.log
+*.swp
+*~
+
+########################################
+# Local documentation/notes
+########################################
+kmp_by_tutorials.md
+desktop_by_tut.md

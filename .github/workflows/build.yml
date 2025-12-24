@@ -1,0 +1,103 @@
+name: Build and Release (macOS + Windows)
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  macos-silicon:
+    runs-on: macos-14  # macos-14 is M1/ARM64, macos-13 is Intel
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          architecture: 'aarch64'
+      - name: Verify Swift and Xcode
+        run: |
+          swift --version
+          xcodebuild -version
+      - name: Build macOS DMG
+        run: |
+          chmod +x ./scripts/**/*.sh
+          # Swift bridge for ScreenCaptureKit will be built automatically by Gradle
+          # JAVE2 provides signed FFmpeg binaries - no need to build
+          ./scripts/package/create-full-package.sh
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gif-land-mac-silicon
+          path: composeApp/build/compose/binaries/main/dmg/gif-land-mac-silicon.dmg
+
+  windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Install WiX Toolset (for MSI packaging)
+        shell: powershell
+        run: |
+          choco install wixtoolset --no-progress -y
+          $wixBin = "C:\\Program Files (x86)\\WiX Toolset v3.11\\bin"
+          if (Test-Path $wixBin) { echo "$wixBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append }
+      - name: Enable Git-Bash and tools
+        shell: bash
+        run: |
+          git config --global core.autocrlf input || true
+      - name: Build Windows MSI
+        shell: bash
+        run: |
+          chmod +x ./scripts/**/*.sh || true
+          # JAVE2 provides signed FFmpeg binaries - no need to build
+          ./scripts/package/create-full-package-windows.sh
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gif-land-windows
+          path: composeApp/build/compose/binaries/main/msi/gif-land-windows.msi
+
+  release:
+    needs: [macos-silicon, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION="dev-${{ github.sha }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.version }}
+          files: |
+            dist/gif-land-mac-silicon/**
+            dist/gif-land-windows/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
