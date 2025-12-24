@@ -30,7 +30,6 @@
 - ⏸️ **Pause & Resume** - Control your recording without losing frames
 - ⏱️ **Countdown Timer** - Configurable pre-recording delay with visual overlay
 - 🔔 **System Tray Integration** - Minimize to tray, quick controls, and recording indicator
-- ⌨️ **Global Hotkeys** - Start/stop/pause recording from anywhere
 - 💾 **Small File Sizes** - WebP format provides excellent quality with minimal size
 - 🔄 **Smart Fallback** - Automatic capture method selection for best compatibility
 
