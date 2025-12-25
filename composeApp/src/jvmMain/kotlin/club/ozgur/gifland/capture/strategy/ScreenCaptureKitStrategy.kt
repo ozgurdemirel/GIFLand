@@ -80,7 +80,25 @@ class ScreenCaptureKitStrategy : ScreenCaptureStrategy {
     private fun pickDisplayId(area: CaptureArea?): Int {
         val b = bridge ?: return 0
         val ptr = b.sck_list_displays_json() ?: return 0
-        val json = ptr.getString(0)
+
+        // Safely read JSON from native pointer with validation
+        val json = try {
+            ptr.getString(0)
+        } catch (e: Exception) {
+            Log.e(name, "Failed to read displays JSON from native pointer", e)
+            return 0
+        }
+
+        if (json.isNullOrBlank()) {
+            Log.e(name, "Displays JSON is null or blank")
+            return 0
+        }
+
+        if (!json.trimStart().startsWith("[")) {
+            Log.e(name, "Invalid displays JSON format: ${json.take(100)}")
+            return 0
+        }
+
         Log.d(name, "SCK displays JSON: ${json.take(256)}")
 
         // Parse displays from JSON

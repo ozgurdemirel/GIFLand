@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.awt.GraphicsEnvironment
 import java.awt.Point
 import java.awt.Rectangle
@@ -115,7 +116,7 @@ class Recorder {
         startTime = System.currentTimeMillis()
         pausedDuration = 0
         pauseStartTime = 0
-        _state.value = RecordingState(isRecording = true)
+        _state.update { RecordingState(isRecording = true) }
         Log.d("Recorder", "startRecording area=$area settings=$settings")
 
         // Apply GIF-specific FPS caps earlier to avoid over-capturing
@@ -210,11 +211,11 @@ class Recorder {
                 is RobotApiCaptureStrategy -> sckInitFailureMsg
                 else -> null
             }
-            _state.value = _state.value.copy(captureMethod = currentMethod, captureMethodDetails = details)
+            _state.update { it.copy(captureMethod = currentMethod, captureMethodDetails = details) }
         }
 
         // Early diagnostics & fallback: if no frames after a short while, advance through fallback chain
-        CoroutineScope(Dispatchers.IO).launch {
+        ApplicationScope.launchIO {
             delay(3000)
             if (_state.value.isRecording && frameFiles.isEmpty()) {
                 val alive = captureStrategy?.isRunning() ?: false
@@ -231,7 +232,7 @@ class Recorder {
                             captureStrategy = RobotApiCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
                             val method = "Robot API"
                             val details = "ScreenCaptureKit kare üretemedi"
-                            _state.value = _state.value.copy(captureMethod = method, captureMethodDetails = details)
+                            _state.update { it.copy(captureMethod = method, captureMethodDetails = details) }
                             withContext(Dispatchers.Main) { onUpdate(_state.value) }
                         }
                         is RobotApiCaptureStrategy -> {
@@ -240,7 +241,7 @@ class Recorder {
                             captureStrategy = FFmpegCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
                             val method = "FFmpeg"
                             val details = "Robot API kare uretemedi"
-                            _state.value = _state.value.copy(captureMethod = method, captureMethodDetails = details)
+                            _state.update { it.copy(captureMethod = method, captureMethodDetails = details) }
                             withContext(Dispatchers.Main) { onUpdate(_state.value) }
                         }
                         else -> {
@@ -249,12 +250,12 @@ class Recorder {
                             captureStrategy = FFmpegCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
                             val method = "FFmpeg"
                             val details = "Onceki yontem kare uretemedi"
-                            _state.value = _state.value.copy(captureMethod = method, captureMethodDetails = details)
+                            _state.update { it.copy(captureMethod = method, captureMethodDetails = details) }
                             withContext(Dispatchers.Main) { onUpdate(_state.value) }
                         }
                     }
                     fallbackStep = 1
-                    return@launch
+                    return@launchIO
                 } else if (fallbackStep == 1) {
                     // Second fallback step (ensure FFmpeg is used)
                     if (captureStrategy !is FFmpegCaptureStrategy) {
@@ -263,11 +264,11 @@ class Recorder {
                         captureStrategy = FFmpegCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
                         val method = "FFmpeg"
                         val details = "Son care FFmpeg'e gecildi"
-                        _state.value = _state.value.copy(captureMethod = method, captureMethodDetails = details)
+                        _state.update { it.copy(captureMethod = method, captureMethodDetails = details) }
                         withContext(Dispatchers.Main) { onUpdate(_state.value) }
                     }
                     fallbackStep = 2
-                    return@launch
+                    return@launchIO
                 }
 
                 val baseMsg = if (!alive) {
@@ -287,7 +288,7 @@ class Recorder {
         }
 
         // Start collector to watch output directory and update state
-        collectorJob = CoroutineScope(Dispatchers.IO).launch {
+        collectorJob = ApplicationScope.launchIO {
             var lastCount = 0
             var lastCountChangeAt = System.currentTimeMillis()
             var lastDurationEmitted = -1
@@ -314,16 +315,16 @@ class Recorder {
                     if (frameFiles.size != lastCount) {
                         lastCount = frameFiles.size
                         lastCountChangeAt = now
-                        _state.value = _state.value.copy(
+                        _state.update { it.copy(
                             frameCount = frameFiles.size,
                             duration = duration,
                             estimatedSize = cumulativeBytes
-                        )
+                        ) }
                         withContext(Dispatchers.Main) { onUpdate(_state.value) }
                     } else if (duration != lastDurationEmitted) {
                         // Also keep the timer UI progressing even if frames stall
                         lastDurationEmitted = duration
-                        _state.value = _state.value.copy(duration = duration, estimatedSize = cumulativeBytes)
+                        _state.update { it.copy(duration = duration, estimatedSize = cumulativeBytes) }
                         withContext(Dispatchers.Main) { onUpdate(_state.value) }
                     }
 
@@ -339,14 +340,14 @@ class Recorder {
                                 // Only fallback if SCK truly stopped producing frames (not just slow encoding)
                                 runCatching { captureStrategy?.stop() }
                                 captureStrategy = RobotApiCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
-                                _state.value = _state.value.copy(captureMethod = "Robot API", captureMethodDetails = "ScreenCaptureKit kare akışı durdu")
+                                _state.update { it.copy(captureMethod = "Robot API", captureMethodDetails = "ScreenCaptureKit kare akışı durdu") }
                                 withContext(Dispatchers.Main) { onUpdate(_state.value) }
                                 lastCountChangeAt = now // reset after switching
                             }
                             is RobotApiCaptureStrategy -> {
                                 runCatching { captureStrategy?.stop() }
                                 captureStrategy = FFmpegCaptureStrategy().also { it.start(area, clampedFps, settings.scale, jpegQualityPercent, tempDir!!) }
-                                _state.value = _state.value.copy(captureMethod = "FFmpeg", captureMethodDetails = "Robot API kare akışı durdu")
+                                _state.update { it.copy(captureMethod = "FFmpeg", captureMethodDetails = "Robot API kare akışı durdu") }
                                 withContext(Dispatchers.Main) { onUpdate(_state.value) }
                                 lastCountChangeAt = now
                             }
@@ -355,7 +356,7 @@ class Recorder {
 
                     if (duration >= settings.maxDuration) {
                         Log.d("Recorder", "Max duration reached, stopping and saving...")
-                        CoroutineScope(Dispatchers.IO).launch {
+                        ApplicationScope.launchIO {
                             val result = stopRecordingInternal()
                             withContext(Dispatchers.Main) { onComplete(result) }
                         }
@@ -365,7 +366,7 @@ class Recorder {
                     break
                 } catch (e: Exception) {
                     Log.e("Recorder", "Collector error", e)
-                    _state.value = _state.value.copy(isRecording = false)
+                    _state.update { it.copy(isRecording = false) }
                     _lastError.value = e.message ?: "Bilinmeyen ekran yakalama hatas\u0131"
                     withContext(Dispatchers.Main) { onComplete(Result.failure(e)) }
                     cancel("Collector failed", e)
@@ -379,7 +380,7 @@ class Recorder {
 
     fun pauseRecording() {
         val wasPaused = _state.value.isPaused
-        _state.value = _state.value.copy(isPaused = !wasPaused)
+        _state.update { it.copy(isPaused = !wasPaused) }
         Log.d("Recorder", "pauseRecording called: wasPaused=$wasPaused -> isPaused=${!wasPaused}")
 
         if (!wasPaused) {
@@ -407,7 +408,7 @@ class Recorder {
     }
 
     private suspend fun stopRecordingInternal(): Result<File> {
-        _state.value = _state.value.copy(isRecording = false, isSaving = true, saveProgress = 0)
+        _state.update { it.copy(isRecording = false, isSaving = true, saveProgress = 0) }
         // Cancel capture loop immediately to stop producing frames
         recordingJob?.cancel()
         recordingJob = null
@@ -465,7 +466,7 @@ class Recorder {
                             fps = actualFps,
                             onProgress = { p ->
                                 Log.d("Recorder", "WebP encoding progress: $p%")
-                                _state.value = _state.value.copy(saveProgress = p)
+                                _state.update { it.copy(saveProgress = p) }
                             }
                         )
                         cleanupTemp()
@@ -507,7 +508,7 @@ class Recorder {
 						fastMode = settings.fastGifPreview,
 						onProgress = { p ->
 							Log.d("Recorder", "GIF encoding progress: $p%")
-							_state.value = _state.value.copy(saveProgress = p)
+							_state.update { it.copy(saveProgress = p) }
 						}
 					)
 				Log.d("Recorder", "GIF encoding completed, cleaning up temp files...")
@@ -524,7 +525,7 @@ class Recorder {
             }
         }
         // Mark saving done - clear the progress to 0 when done
-        _state.value = _state.value.copy(isSaving = false, saveProgress = 0)
+        _state.update { it.copy(isSaving = false, saveProgress = 0) }
         Log.d("Recorder", "Saving complete, state updated: isSaving=false, saveProgress=0")
 
         // Store last saved file on success; set error on failure
@@ -572,7 +573,7 @@ class Recorder {
 
     fun reset() {
         Log.d("Recorder", "Reset called - clearing recording state (preserving lastSavedFile)")
-        _state.value = RecordingState()
+        _state.update { RecordingState() }
         frameFiles.clear()
         cumulativeBytes = 0
         // NOTE: _lastSavedFile is intentionally NOT reset here

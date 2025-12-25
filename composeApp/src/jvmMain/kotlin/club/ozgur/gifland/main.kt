@@ -107,8 +107,8 @@ fun main() = application {
     }
 
     val windowState = rememberWindowState(
-        width = 360.dp,
-        height = 480.dp,
+        width = 380.dp,
+        height = 580.dp,
         position = WindowPosition(Alignment.Center)
     )
 

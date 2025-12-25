@@ -32,6 +32,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindow
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.rememberDialogState
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
@@ -97,10 +100,13 @@ object MainScreenCompact : Screen {
             }
         }
 
-        // Navigate to settings screen when triggered from system tray
+        // Settings dialog state
+        var showSettingsDialog by remember { mutableStateOf(false) }
+
+        // Show settings dialog when triggered from system tray
         LaunchedEffect(appState) {
             if (appState is AppState.ConfiguringSettings) {
-                navigator.push(IntegratedSettingsScreen)
+                showSettingsDialog = true
             }
         }
 
@@ -201,8 +207,8 @@ object MainScreenCompact : Screen {
             ) {
                 Card(
                     modifier = Modifier
-                        .widthIn(max = 320.dp) // Compact width
-                        .heightIn(max = 520.dp) // Maximum height to prevent cutting off
+                        .widthIn(max = 340.dp) // Slightly wider for better fit
+                        .heightIn(max = 620.dp)
                         .shadow(12.dp, RoundedCornerShape(20.dp)),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
@@ -236,7 +242,7 @@ object MainScreenCompact : Screen {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .verticalScroll(scrollState)
-                                    .padding(20.dp)
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
                                     // Add fade effect at top and bottom when scrollable
                                     .drawWithContent {
                                         drawContent()
@@ -277,7 +283,7 @@ object MainScreenCompact : Screen {
                                         }
                                     },
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                             // App Title
                             Text(
@@ -314,7 +320,7 @@ object MainScreenCompact : Screen {
 
                             // Main Record Button
                             Box(
-                            modifier = Modifier.size(100.dp),
+                            modifier = Modifier.size(90.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             // Outer ring
@@ -344,10 +350,11 @@ object MainScreenCompact : Screen {
                                     }
                                 },
                                 modifier = Modifier
-                                    .size(80.dp)
+                                    .size(72.dp)
                                     .alpha(if (recordingState.isSaving) 0.5f else 1f),
                                 enabled = !recordingState.isSaving,
                                 shape = CircleShape,
+                                contentPadding = PaddingValues(0.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color(0xFFFF5252),
                                     disabledContainerColor = Color(0xFFFF5252).copy(alpha = 0.4f)
@@ -563,8 +570,6 @@ object MainScreenCompact : Screen {
                                     }
                                 }
 
-                                Spacer(Modifier.height(4.dp))
-
                                 // Bottom row with settings, duration, fps, quality toggles
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
@@ -573,136 +578,64 @@ object MainScreenCompact : Screen {
                                 ) {
                                     // Settings
                                     IconButton(
-                                        onClick = { navigator.push(IntegratedSettingsScreen) },
-                                        modifier = Modifier.size(32.dp)
+                                        onClick = { showSettingsDialog = true },
+                                        modifier = Modifier.size(24.dp)
                                     ) {
-                                        Text("⚙️", fontSize = 16.sp)
+                                        Text("⚙️", fontSize = 14.sp)
                                     }
 
-                                    // Duration toggle button with info tooltip
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        TextButton(
-                                            onClick = {
-                                                showDurationSelector = !showDurationSelector
-                                                showFpsSelector = false
-                                                showQualitySelector = false
-                                            },
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = if (showDurationSelector)
-                                                    MaterialTheme.colorScheme.primary
-                                                else MaterialTheme.colorScheme.onSurfaceVariant
-                                            ),
-                                            contentPadding = PaddingValues(horizontal = 4.dp)
-                                        ) {
-                                            val durationText = if (currentSettings.maxDuration >= 60)
-                                                "${currentSettings.maxDuration / 60}m"
-                                            else "${currentSettings.maxDuration}s"
-                                            Text("⏱️$durationText", fontSize = 11.sp)
-                                        }
-                                        TooltipArea(
-                                            tooltip = {
-                                                Surface(
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    color = MaterialTheme.colorScheme.inverseSurface
-                                                ) {
-                                                    Text(
-                                                        "Max recording duration.\nRecording stops automatically.",
-                                                        modifier = Modifier.padding(6.dp),
-                                                        fontSize = 11.sp,
-                                                        color = MaterialTheme.colorScheme.inverseOnSurface
-                                                    )
-                                                }
-                                            },
-                                            delayMillis = 300
-                                        ) {
-                                            Text(
-                                                "ℹ️",
-                                                fontSize = 10.sp,
-                                                modifier = Modifier.alpha(0.5f)
-                                            )
-                                        }
+                                    // Duration toggle button
+                                    TextButton(
+                                        onClick = {
+                                            showDurationSelector = !showDurationSelector
+                                            showFpsSelector = false
+                                            showQualitySelector = false
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = if (showDurationSelector)
+                                                MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurfaceVariant
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                                    ) {
+                                        val durationText = if (currentSettings.maxDuration >= 60)
+                                            "${currentSettings.maxDuration / 60}m"
+                                        else "${currentSettings.maxDuration}s"
+                                        Text("⏱️$durationText", fontSize = 11.sp)
                                     }
 
-                                    // FPS toggle button with info tooltip
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        TextButton(
-                                            onClick = {
-                                                showFpsSelector = !showFpsSelector
-                                                showDurationSelector = false
-                                                showQualitySelector = false
-                                            },
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = if (showFpsSelector)
-                                                    MaterialTheme.colorScheme.primary
-                                                else MaterialTheme.colorScheme.onSurfaceVariant
-                                            ),
-                                            contentPadding = PaddingValues(horizontal = 4.dp)
-                                        ) {
-                                            Text("🎞️${currentSettings.fps}", fontSize = 11.sp)
-                                        }
-                                        TooltipArea(
-                                            tooltip = {
-                                                Surface(
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    color = MaterialTheme.colorScheme.inverseSurface
-                                                ) {
-                                                    Text(
-                                                        "Frames per second.\nHigher = smoother, larger file.",
-                                                        modifier = Modifier.padding(6.dp),
-                                                        fontSize = 11.sp,
-                                                        color = MaterialTheme.colorScheme.inverseOnSurface
-                                                    )
-                                                }
-                                            },
-                                            delayMillis = 300
-                                        ) {
-                                            Text(
-                                                "ℹ️",
-                                                fontSize = 10.sp,
-                                                modifier = Modifier.alpha(0.5f)
-                                            )
-                                        }
+                                    // FPS toggle button
+                                    TextButton(
+                                        onClick = {
+                                            showFpsSelector = !showFpsSelector
+                                            showDurationSelector = false
+                                            showQualitySelector = false
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = if (showFpsSelector)
+                                                MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurfaceVariant
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                                    ) {
+                                        Text("🎞️${currentSettings.fps}", fontSize = 11.sp)
                                     }
 
-                                    // Quality toggle button with info tooltip
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        TextButton(
-                                            onClick = {
-                                                showQualitySelector = !showQualitySelector
-                                                showDurationSelector = false
-                                                showFpsSelector = false
-                                            },
-                                            colors = ButtonDefaults.textButtonColors(
-                                                contentColor = if (showQualitySelector)
-                                                    MaterialTheme.colorScheme.primary
-                                                else MaterialTheme.colorScheme.onSurfaceVariant
-                                            ),
-                                            contentPadding = PaddingValues(horizontal = 4.dp)
-                                        ) {
-                                            Text("Q${currentSettings.quality}", fontSize = 11.sp)
-                                        }
-                                        TooltipArea(
-                                            tooltip = {
-                                                Surface(
-                                                    shape = RoundedCornerShape(4.dp),
-                                                    color = MaterialTheme.colorScheme.inverseSurface
-                                                ) {
-                                                    Text(
-                                                        "Output quality.\nHigher = sharper, larger file.",
-                                                        modifier = Modifier.padding(6.dp),
-                                                        fontSize = 11.sp,
-                                                        color = MaterialTheme.colorScheme.inverseOnSurface
-                                                    )
-                                                }
-                                            },
-                                            delayMillis = 300
-                                        ) {
-                                            Text(
-                                                "ℹ️",
-                                                fontSize = 10.sp,
-                                                modifier = Modifier.alpha(0.5f)
-                                            )
-                                        }
+                                    // Quality toggle button
+                                    TextButton(
+                                        onClick = {
+                                            showQualitySelector = !showQualitySelector
+                                            showDurationSelector = false
+                                            showFpsSelector = false
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(
+                                            contentColor = if (showQualitySelector)
+                                                MaterialTheme.colorScheme.primary
+                                            else MaterialTheme.colorScheme.onSurfaceVariant
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)
+                                    ) {
+                                        Text("Q${currentSettings.quality}", fontSize = 11.sp)
                                     }
                                 }
                             } // Close Column
@@ -751,6 +684,121 @@ object MainScreenCompact : Screen {
                     } // Close Column (line 147 - card content column)
             } // Close Card (line 129)
         } // Close Box (line 125)
+
+        // Settings Dialog Window
+        if (showSettingsDialog) {
+            DialogWindow(
+                onCloseRequest = { showSettingsDialog = false },
+                title = "Settings",
+                state = rememberDialogState(
+                    position = WindowPosition.PlatformDefault,
+                    width = 380.dp,
+                    height = 400.dp
+                ),
+                resizable = false
+            ) {
+                SettingsDialogContent(
+                    onClose = { showSettingsDialog = false }
+                )
+            }
+        }
     } // Close Surface (line 119)
 } // Close Content function (line 45)
 } // Close object MainScreenCompact (line 43)
+
+/**
+ * Settings dialog content - displayed in a separate window
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsDialogContent(onClose: () -> Unit) {
+    val koin = org.koin.compose.getKoin()
+    val settingsViewModel = remember { koin.get<club.ozgur.gifland.presentation.viewmodel.SettingsViewModel>() }
+    val scope = rememberCoroutineScope()
+    val settings by settingsViewModel.settings.collectAsState()
+
+    var selectedTab by remember { mutableStateOf(club.ozgur.gifland.domain.model.SettingsTab.Appearance) }
+
+    MaterialTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Tab Row
+                TabRow(
+                    selectedTabIndex = selectedTab.ordinal,
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    club.ozgur.gifland.domain.model.SettingsTab.entries.forEach { tab ->
+                        Tab(
+                            selected = selectedTab == tab,
+                            onClick = { selectedTab = tab },
+                            text = { Text(tab.name) }
+                        )
+                    }
+                }
+
+                // Content
+                Box(modifier = Modifier.weight(1f)) {
+                    when (selectedTab) {
+                        club.ozgur.gifland.domain.model.SettingsTab.Appearance -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp)) {
+                                        Text("Theme", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                        Spacer(Modifier.height(8.dp))
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            FilterChip(
+                                                selected = settings.theme == club.ozgur.gifland.domain.model.AppTheme.Light,
+                                                onClick = { scope.launch { settingsViewModel.changeTheme(club.ozgur.gifland.domain.model.AppTheme.Light) } },
+                                                label = { Text("Light") }
+                                            )
+                                            FilterChip(
+                                                selected = settings.theme == club.ozgur.gifland.domain.model.AppTheme.Dark,
+                                                onClick = { scope.launch { settingsViewModel.changeTheme(club.ozgur.gifland.domain.model.AppTheme.Dark) } },
+                                                label = { Text("Dark") }
+                                            )
+                                            FilterChip(
+                                                selected = settings.theme == club.ozgur.gifland.domain.model.AppTheme.System,
+                                                onClick = { scope.launch { settingsViewModel.changeTheme(club.ozgur.gifland.domain.model.AppTheme.System) } },
+                                                label = { Text("System") }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        club.ozgur.gifland.domain.model.SettingsTab.About -> {
+                            Column(
+                                modifier = Modifier.fillMaxSize().padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Spacer(Modifier.height(16.dp))
+                                Text("GIF Land", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text("Version 1.0.11", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Spacer(Modifier.height(8.dp))
+                                Text("Coded in Ankara, grown with passion", fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                                TextButton(onClick = {
+                                    try { java.awt.Desktop.getDesktop().browse(java.net.URI("https://www.linkedin.com/in/ozgdemirel/")) } catch (_: Exception) {}
+                                }) {
+                                    Text("linkedin.com/in/ozgdemirel", fontSize = 13.sp, color = Color(0xFF0A66C2))
+                                }
+                                Spacer(Modifier.weight(1f))
+                                Text("© 2025 Ozgur Demirel", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f))
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+}

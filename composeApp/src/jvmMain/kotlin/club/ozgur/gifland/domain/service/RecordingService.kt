@@ -9,7 +9,7 @@ import club.ozgur.gifland.domain.repository.SettingsRepository
 import club.ozgur.gifland.domain.repository.WindowStateRepository
 import club.ozgur.gifland.platform.MonitorDetector
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -113,8 +113,8 @@ class RecordingService(
                     if (updateTime > lastUpdateTime) {
                         lastUpdateTime = updateTime
 
-                        // Use runBlocking to ensure updates complete before next callback
-                        runBlocking {
+                        // Use ApplicationScope.launch to avoid blocking IO thread
+                        ApplicationScope.launch {
                             try {
                                 stateRepository.updateRecordingProgress(
                                     frameCount = recorderState.frameCount,
@@ -137,7 +137,7 @@ class RecordingService(
                     }
                 },
                 onComplete = { result ->
-                    runBlocking {
+                    ApplicationScope.launch {
                         try {
                             handleRecordingComplete(result)
                         } catch (e: Exception) {

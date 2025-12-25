@@ -52,7 +52,11 @@ object NativeEncoderSimple {
         fps: Int = 30,
         onProgress: ((Int) -> Unit)? = null
     ): Result<File> {
-        return try {
+        var process: Process? = null
+        var stderrThread: Thread? = null
+        var stdoutThread: Thread? = null
+
+        try {
             // Use bundled or system ffmpeg
             val ffmpegPath = findFfmpeg()
 
@@ -102,7 +106,7 @@ object NativeEncoderSimple {
 
             Log.d("NativeEncoderSimple", "FFmpeg command: ${ffmpegCommand.joinToString(" ")}")
 
-            val process = ProcessBuilder(ffmpegCommand)
+            process = ProcessBuilder(ffmpegCommand)
                 .redirectErrorStream(false).start() // Don't mix stderr with stdout
 
             // Monitor FFmpeg progress in a separate thread
@@ -112,9 +116,9 @@ object NativeEncoderSimple {
             // Track if process crashed with error 134
             var crashedWith134 = false
 
-            Thread {
+            stderrThread = Thread {
                 try {
-                    val reader = process.errorStream.bufferedReader() // FFmpeg outputs to stderr
+                    val reader = process!!.errorStream.bufferedReader() // FFmpeg outputs to stderr
                     var line: String?
                     var lastProgress = 0
 
@@ -151,14 +155,12 @@ object NativeEncoderSimple {
                 } catch (e: Exception) {
                     Log.e("NativeEncoderSimple", "Error reading FFmpeg stderr", e)
                 }
-            }.start()
-
-            // Using only real FFmpeg progress
+            }.apply { start() }
 
             // Read stdout for progress info
-            Thread {
+            stdoutThread = Thread {
                 try {
-                    val reader = process.inputStream.bufferedReader()
+                    val reader = process!!.inputStream.bufferedReader()
                     var line: String?
                     while (reader.readLine().also { line = it } != null) {
                         // Parse progress output if using -progress flag
@@ -169,16 +171,26 @@ object NativeEncoderSimple {
                 } catch (e: Exception) {
                     Log.e("NativeEncoderSimple", "Error reading FFmpeg stdout", e)
                 }
-            }.start()
+            }.apply { start() }
 
             // Wait for process to complete (increased timeout for WebP)
             val success = process.waitFor(540, TimeUnit.SECONDS)
+
+            // Join threads with timeout to prevent hanging
+            stderrThread.join(5000)
+            stdoutThread.join(5000)
+
             val output = outputBuilder.toString()
+
+            // Cleanup process if it timed out
+            if (!success && process.isAlive) {
+                process.destroyForcibly()
+            }
 
             if (success && process.exitValue() == 0 && outputFile.exists()) {
                 Log.d("NativeEncoderSimple", "WebP encoding successful: ${outputFile.absolutePath} (${outputFile.length()} bytes)")
                 onProgress?.invoke(100)
-                Result.success(outputFile)
+                return Result.success(outputFile)
             } else {
                 val exitCode = if (success) process.exitValue() else -1
                 val errorMsg = when {
@@ -209,11 +221,15 @@ object NativeEncoderSimple {
                 if (errorLines.isNotEmpty()) {
                     Log.e("NativeEncoderSimple", "FFmpeg error output: $errorLines")
                 }
-                Result.failure(Exception(errorMsg))
+                return Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
             Log.e("NativeEncoderSimple", "WebP encoding error", e)
-            Result.failure(e)
+            // Cleanup process on exception
+            process?.let {
+                if (it.isAlive) it.destroyForcibly()
+            }
+            return Result.failure(e)
         }
     }
 
@@ -225,7 +241,11 @@ object NativeEncoderSimple {
         fastMode: Boolean = false,
         onProgress: ((Int) -> Unit)? = null
     ): Result<File> {
-        return try {
+        var process: Process? = null
+        var stderrThread: Thread? = null
+        var paletteFile: File? = null
+
+        try {
             val ffmpegPath = findFfmpeg()
             val osName = System.getProperty("os.name").lowercase()
             val isMac = osName.contains("mac") || osName.contains("darwin")
@@ -310,7 +330,7 @@ object NativeEncoderSimple {
             onProgress?.invoke(0)
 
             // Try to generate palette first for better quality
-            val paletteFile = File(frameDir, "palette.png")
+            paletteFile = File(frameDir, "palette.png")
             var usePalette = false
 
             try {
@@ -321,21 +341,34 @@ object NativeEncoderSimple {
                         // Input image sequence
                         *buildImageSequenceInputArgs(frameFiles, targetFps).toTypedArray(),
                         "-vf", "fps=$targetFps,scale=$width:$height:flags=lanczos,palettegen=max_colors=$maxColors:stats_mode=full",
-                        paletteFile.absolutePath
+                        paletteFile!!.absolutePath
                     ))
                 }
 
                 Log.d("NativeEncoderSimple", "Attempting to generate palette for better quality...")
-                val paletteProcess = ProcessBuilder(paletteCmd).start()
+                val paletteProcess = ProcessBuilder(paletteCmd).redirectErrorStream(true).start()
+
+                // Consume palette process output to prevent buffer deadlock
+                Thread {
+                    try {
+                        paletteProcess.inputStream.bufferedReader().readText()
+                    } catch (_: Exception) {}
+                }.apply { start() }.join(250_000) // Wait up to 250 seconds
+
                 val paletteSuccess = paletteProcess.waitFor(240, TimeUnit.SECONDS)
 
-                if (paletteSuccess && paletteProcess.exitValue() == 0 && paletteFile.exists()) {
+                // Cleanup palette process if timed out
+                if (!paletteSuccess && paletteProcess.isAlive) {
+                    paletteProcess.destroyForcibly()
+                }
+
+                if (paletteSuccess && paletteProcess.exitValue() == 0 && paletteFile!!.exists()) {
                     Log.d("NativeEncoderSimple", "Palette generated successfully")
                     usePalette = true
                     onProgress?.invoke(30) // Palette done
                 } else {
                     Log.d("NativeEncoderSimple", "Palette generation failed, will use direct GIF encoding")
-                    paletteFile.delete() // Clean up any partial file
+                    paletteFile?.delete() // Clean up any partial file
                 }
             } catch (e: Exception) {
                 Log.d("NativeEncoderSimple", "Palette generation error: ${e.message}, falling back to direct encoding")
@@ -352,7 +385,7 @@ object NativeEncoderSimple {
                         "-y",
                         // Input image sequence
                         *buildImageSequenceInputArgs(frameFiles, targetFps).toTypedArray(),
-                        "-i", paletteFile.absolutePath,
+                        "-i", paletteFile!!.absolutePath,
                         "-lavfi", "fps=$targetFps,scale=$width:$height:flags=lanczos [x]; [x][1:v] paletteuse=dither=$dither",
                         outputFile.absolutePath
                     ))
@@ -373,16 +406,16 @@ object NativeEncoderSimple {
 
             Log.d("NativeEncoderSimple", "Encoding GIF ${if (usePalette) "with palette" else "directly"}...")
 
-            val process = ProcessBuilder(gifCmd)
+            process = ProcessBuilder(gifCmd)
                 .redirectErrorStream(false).start()
 
             // Monitor progress
             val outputBuilder = StringBuilder()
             val totalFrames = frameFiles.size
 
-            Thread {
+            stderrThread = Thread {
                 try {
-                    val reader = process.errorStream.bufferedReader()
+                    val reader = process!!.errorStream.bufferedReader()
                     var line: String?
                     var lastProgress = 30
 
@@ -408,23 +441,32 @@ object NativeEncoderSimple {
                 } catch (e: Exception) {
                     Log.e("NativeEncoderSimple", "Error reading FFmpeg stderr", e)
                 }
-            }.start()
+            }.apply { start() }
 
             // Wait for process to complete
             val success = process.waitFor(600, TimeUnit.SECONDS)
+
+            // Join stderr thread with timeout
+            stderrThread.join(5000)
+
             val output = outputBuilder.toString()
 
+            // Cleanup process if it timed out
+            if (!success && process.isAlive) {
+                process.destroyForcibly()
+            }
+
             // Clean up palette file
-            paletteFile.delete()
+            paletteFile?.delete()
 
             if (success && process.exitValue() == 0 && outputFile.exists()) {
                 Log.d("NativeEncoderSimple", "GIF encoding successful: ${outputFile.absolutePath} (${outputFile.length()} bytes)")
                 onProgress?.invoke(100)
-                Result.success(outputFile)
+                return Result.success(outputFile)
             } else {
                 val exitCode = if (success) process.exitValue() else -1
                 val errorMsg = when {
-                    !success -> "FFmpeg process timed out after 120 seconds"
+                    !success -> "FFmpeg process timed out after 600 seconds"
                     exitCode != 0 -> "FFmpeg exited with error code: $exitCode"
                     !outputFile.exists() -> "Output file was not created"
                     else -> "Unknown error during encoding"
@@ -440,11 +482,17 @@ object NativeEncoderSimple {
                 if (errorLines.isNotEmpty()) {
                     Log.e("NativeEncoderSimple", "FFmpeg error output: $errorLines")
                 }
-                Result.failure(Exception(errorMsg))
+                return Result.failure(Exception(errorMsg))
             }
         } catch (e: Exception) {
             Log.e("NativeEncoderSimple", "GIF encoding error", e)
-            Result.failure(e)
+            // Cleanup process on exception
+            process?.let {
+                if (it.isAlive) it.destroyForcibly()
+            }
+            // Cleanup palette file on exception
+            paletteFile?.delete()
+            return Result.failure(e)
         }
     }
 }
