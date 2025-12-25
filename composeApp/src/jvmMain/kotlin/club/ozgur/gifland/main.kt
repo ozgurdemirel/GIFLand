@@ -208,6 +208,13 @@ fun main() = application {
                     settingsRepository.updateSetting { it.copy(defaultFormat = domainFormat) }
                 }
             },
+            // Duration selection
+            currentDuration = appSettings.defaultMaxDuration,
+            onDurationChange = { duration ->
+                ApplicationScope.launch {
+                    settingsRepository.updateSetting { it.copy(defaultMaxDuration = duration) }
+                }
+            },
             // Recording state actions
             onPauseResume = {
                 ApplicationScope.launch {

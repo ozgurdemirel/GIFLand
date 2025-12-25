@@ -82,35 +82,43 @@ object PlatformActions {
     }
 
     /**
-     * Copy file path to clipboard
+     * Copy file to clipboard (can be pasted into Finder, Word, etc.)
      */
     fun copyToClipboard(filePath: String) {
         try {
             val file = File(filePath)
             if (file.exists()) {
-                val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                if (isMac()) {
+                    // macOS: Use AppleScript for proper file clipboard support
+                    val process = Runtime.getRuntime().exec(arrayOf(
+                        "osascript", "-e",
+                        "set the clipboard to POSIX file \"${file.absolutePath}\""
+                    ))
+                    process.waitFor()
+                    println("Copied file to clipboard (macOS): $filePath")
+                } else {
+                    // Windows/Linux: Use Java clipboard with file list flavor
+                    val clipboard = Toolkit.getDefaultToolkit().systemClipboard
+                    val transferable = object : Transferable {
+                        override fun getTransferDataFlavors(): Array<DataFlavor> {
+                            return arrayOf(DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor)
+                        }
 
-                // Create a transferable that supports both file and string
-                val transferable = object : Transferable {
-                    override fun getTransferDataFlavors(): Array<DataFlavor> {
-                        return arrayOf(DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor)
-                    }
+                        override fun isDataFlavorSupported(flavor: DataFlavor): Boolean {
+                            return flavor == DataFlavor.javaFileListFlavor || flavor == DataFlavor.stringFlavor
+                        }
 
-                    override fun isDataFlavorSupported(flavor: DataFlavor): Boolean {
-                        return flavor == DataFlavor.javaFileListFlavor || flavor == DataFlavor.stringFlavor
-                    }
-
-                    override fun getTransferData(flavor: DataFlavor): Any {
-                        return when (flavor) {
-                            DataFlavor.javaFileListFlavor -> listOf(file)
-                            DataFlavor.stringFlavor -> file.absolutePath
-                            else -> throw UnsupportedFlavorException(flavor)
+                        override fun getTransferData(flavor: DataFlavor): Any {
+                            return when (flavor) {
+                                DataFlavor.javaFileListFlavor -> listOf(file)
+                                DataFlavor.stringFlavor -> file.absolutePath
+                                else -> throw UnsupportedFlavorException(flavor)
+                            }
                         }
                     }
+                    clipboard.setContents(transferable, null)
+                    println("Copied file to clipboard: $filePath")
                 }
-
-                clipboard.setContents(transferable, null)
-                println("Copied to clipboard: $filePath")
             } else {
                 println("File does not exist: $filePath")
             }

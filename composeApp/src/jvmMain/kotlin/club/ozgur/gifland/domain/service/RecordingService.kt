@@ -178,13 +178,19 @@ class RecordingService(
     }
 
     private suspend fun handleRecordingComplete(result: Result<File>) {
+        // Ensure state transitions to Processing if still Recording (e.g., max duration auto-stop)
+        val currentState = stateRepository.state.value
+        if (currentState is AppState.Recording) {
+            stateRepository.stopRecording()
+        }
+
         result.fold(
             onSuccess = { file ->
                 // Get the current recording session
-                val currentState = stateRepository.state.value
-                val session = when (currentState) {
-                    is AppState.Recording -> currentState.session
-                    is AppState.Processing -> currentState.session
+                val processingState = stateRepository.state.value
+                val session = when (processingState) {
+                    is AppState.Recording -> processingState.session
+                    is AppState.Processing -> processingState.session
                     else -> null
                 }
 

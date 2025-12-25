@@ -53,6 +53,9 @@ fun ApplicationScope.SystemTray(
     // Format selection
     currentFormat: OutputFormat = OutputFormat.GIF,
     onFormatChange: (OutputFormat) -> Unit = {},
+    // Duration selection
+    currentDuration: Int = 30,
+    onDurationChange: (Int) -> Unit = {},
     // Recording state actions
     onPauseResume: () -> Unit = {},
     onStopRecording: () -> Unit = {},
@@ -128,14 +131,14 @@ fun ApplicationScope.SystemTray(
 
     val trayStateRemember = rememberTrayState()
 
-    // Use key to force tray recreation when state TYPE changes
+    // Use key to force tray recreation when state TYPE or format changes
     val stateKey = when (trayState) {
         is TrayState.Idle -> "idle"
         is TrayState.Recording -> "recording"
         is TrayState.Processing -> "processing"
     }
 
-    key(stateKey) {
+    key(stateKey, currentFormat, currentDuration) {
         Tray(
             icon = currentIcon,
             state = trayStateRemember,
@@ -155,6 +158,8 @@ fun ApplicationScope.SystemTray(
                     onCopyToClipboard = onCopyToClipboard,
                     currentFormat = currentFormat,
                     onFormatChange = onFormatChange,
+                    currentDuration = currentDuration,
+                    onDurationChange = onDurationChange,
                     onShowMainWindow = onShowMainWindow,
                     onOpenSettings = onOpenSettings,
                     onExit = onExit
@@ -195,6 +200,8 @@ private fun MenuScope.IdleMenu(
     onCopyToClipboard: () -> Unit,
     currentFormat: OutputFormat,
     onFormatChange: (OutputFormat) -> Unit,
+    currentDuration: Int,
+    onDurationChange: (Int) -> Unit,
     onShowMainWindow: () -> Unit,
     onOpenSettings: () -> Unit,
     onExit: () -> Unit
@@ -230,6 +237,26 @@ private fun MenuScope.IdleMenu(
         Item(
             text = if (currentFormat == OutputFormat.WEBP) "✓ WebP" else "WebP",
             onClick = { onFormatChange(OutputFormat.WEBP) }
+        )
+    }
+
+    // Duration selection submenu
+    Menu("Duration: ${formatDuration(currentDuration)}") {
+        Item(
+            text = if (currentDuration == 30) "✓ 30s" else "30s",
+            onClick = { onDurationChange(30) }
+        )
+        Item(
+            text = if (currentDuration == 60) "✓ 1m" else "1m",
+            onClick = { onDurationChange(60) }
+        )
+        Item(
+            text = if (currentDuration == 120) "✓ 2m" else "2m",
+            onClick = { onDurationChange(120) }
+        )
+        Item(
+            text = if (currentDuration == 300) "✓ 5m" else "5m",
+            onClick = { onDurationChange(300) }
         )
     }
 
@@ -301,6 +328,17 @@ private fun formatTime(seconds: Int): String {
     val mins = seconds / 60
     val secs = seconds % 60
     return "%d:%02d".format(mins, secs)
+}
+
+/**
+ * Format duration for menu display (e.g., "30s", "1m", "2m")
+ */
+private fun formatDuration(seconds: Int): String {
+    return when {
+        seconds < 60 -> "${seconds}s"
+        seconds % 60 == 0 -> "${seconds / 60}m"
+        else -> "${seconds / 60}m ${seconds % 60}s"
+    }
 }
 
 /**
