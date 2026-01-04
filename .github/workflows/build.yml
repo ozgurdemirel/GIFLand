@@ -64,11 +64,16 @@ jobs:
           chmod +x ./scripts/**/*.sh || true
           # JAVE2 provides signed FFmpeg binaries - no need to build
           ./scripts/package/create-full-package-windows.sh
-      - name: Upload Windows artifact
+      - name: Upload Windows MSI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gif-land-windows
+          name: gif-land-windows-msi
           path: composeApp/build/compose/binaries/main/msi/gif-land-windows.msi
+      - name: Upload Windows portable EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gif-land-windows-exe
+          path: composeApp/build/compose/binaries/main/exe/gif-land-windows-portable.exe
 
   release:
     needs: [macos-silicon, windows]
@@ -98,6 +103,7 @@ jobs:
           name: Release ${{ steps.version.outputs.version }}
           files: |
             dist/gif-land-mac-silicon/**
-            dist/gif-land-windows/**
+            dist/gif-land-windows-msi/**
+            dist/gif-land-windows-exe/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
