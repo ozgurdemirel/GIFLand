@@ -8,10 +8,6 @@
   [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Windows-lightgrey)](https://github.com/ozgurdemirel/GIFLand)
 
   <br/>
-
-  <a href="https://buymeacoffee.com/ozgurdemirel">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" />
-  </a>
 </div>
 
 <div align="center">
